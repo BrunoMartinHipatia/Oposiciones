@@ -245,7 +245,7 @@ fun MainContent(
 
                                )
                            Text(
-                               text = "Examenes",
+                               text = "Flashcards",
                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
                                fontWeight = FontWeight.Medium,
                                modifier = Modifier
@@ -254,32 +254,7 @@ fun MainContent(
                            )
                        }
                    }
-                   Card(
-                       modifier = Modifier.size(160.dp).padding(),
-                       elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                   ) {
-                       Column(
-                           modifier = Modifier.fillMaxSize(),
-                           horizontalAlignment = Alignment.CenterHorizontally
-                       ) {
-                           Image(
-                               painter = painterResource(R.drawable.opo),
-                               contentDescription = "Imagen Examenes",
-                               modifier = Modifier
-                                   .weight(1f)
-                                   .fillMaxWidth(),
 
-                               )
-                           Text(
-                               text = "Mis resultados",
-                               fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                               fontWeight = FontWeight.Medium,
-                               modifier = Modifier
-                                   .padding(8.dp)  ,
-                               color = MaterialTheme.colorScheme.onSurface
-                           )
-                       }
-                   }
                }
 
            }

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,50 +54,90 @@ fun MenuFlashCards(onCreateFlashCard: () -> Unit, onViewFlashCards: () -> Unit) 
         }
     }
 }
-
 @Composable
 fun CrearFlashCard(onBack: () -> Unit, viewModel: FlashCardViewModel) {
+    var textoPregunta by rememberSaveable { mutableStateOf("") }
+    var textoRespuesta by rememberSaveable { mutableStateOf("") }
+    var preguntasRespuestas by remember { mutableStateOf(mutableListOf<Pair<String, String>>()) }
+    var showDialog by remember { mutableStateOf(false) }  // Controla la visibilidad del AlertDialog
+    var nombreFlashCard by rememberSaveable { mutableStateOf("") }  // Guarda el nombre ingresado
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(text = "Pantalla para crear Flashcards", fontSize = 18.sp)
-        var textoPregunta by rememberSaveable { mutableStateOf("") }
-        var textoRespuesta by rememberSaveable { mutableStateOf("") }
-        var preguntasRespuestas by remember { mutableStateOf(mutableListOf<Pair<String, String>>()) }
+
         TextField(
             value = textoPregunta,
-
-            onValueChange = {
-                textoPregunta = it
-            },
+            onValueChange = { textoPregunta = it },
             label = { Text("Escribe la pregunta") }
         )
+
         TextField(
             value = textoRespuesta,
-            onValueChange = {
-                textoRespuesta = it
-            },
+            onValueChange = { textoRespuesta = it },
             label = { Text("Escribe la respuesta") }
         )
 
-
-        Button(onClick = {
-            preguntasRespuestas = preguntasRespuestas.toMutableList().apply {
-                add(textoPregunta to textoRespuesta)
-            }
-        }, modifier = Modifier.padding(top = 16.dp)) {
+        Button(
+            onClick = {
+                if (textoPregunta.isNotBlank() && textoRespuesta.isNotBlank()) {
+                    preguntasRespuestas = preguntasRespuestas.toMutableList().apply {
+                        add(textoPregunta to textoRespuesta)
+                    }
+                    textoPregunta = ""
+                    textoRespuesta = ""
+                }
+            },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
             Text("Añadir pregunta")
         }
-        val flashCard = FlashCard(
-            nombre = "Historia",
-            preguntasRespuestas = listOf(preguntasRespuestas)
 
-        )
-
-        Button(onClick = {
-            viewModel.addFlashCard(flashCard)
-        }, modifier = Modifier.padding(top = 16.dp)) {
-            Text("Creara flashcard")
+        // Botón para abrir el diálogo
+        Button(
+            onClick = { showDialog = true },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text("Crear flashcard")
         }
+
+        // **AlertDialog para ingresar el nombre de la flashcard**
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Escribe el nombre de la flashcard") },
+                text = {
+                    TextField(
+                        value = nombreFlashCard,
+                        onValueChange = { nombreFlashCard = it },
+                        label = { Text("Nombre de la flashcard") }
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (nombreFlashCard.isNotBlank()) {
+                                val flashCard = FlashCard(
+                                    nombre = nombreFlashCard,
+                                    preguntasRespuestas = listOf(preguntasRespuestas)
+                                )
+                                viewModel.addFlashCard(flashCard)
+
+                                nombreFlashCard = ""
+                                showDialog = false
+                            }
+                        }
+                    ) {
+                        Text("Confirmar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
         Button(onClick = onBack, modifier = Modifier.padding(top = 16.dp)) {
             Text("Volver al menú")
         }
