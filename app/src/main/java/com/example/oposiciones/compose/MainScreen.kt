@@ -241,7 +241,7 @@ fun MainContent(
                                contentDescription = "Imagen Examenes",
                                modifier = Modifier
                                    .weight(1f)
-                               ,
+
 
                                )
                            Text(
