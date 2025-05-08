@@ -1,91 +1,148 @@
 package com.example.oposiciones.examenes
 
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.oposiciones.ExamenesContainerActivity
 import com.example.oposiciones.ExamenesResultadosViewModel
 import com.example.oposiciones.ExamenesResultadosViewModelFactory
 import com.example.oposiciones.ExamenesViewModel
 import com.example.oposiciones.ExamenesViewModelFactory
-import com.example.oposiciones.PreguntasActivity
-import com.example.oposiciones.PreguntasGuardadasActivity
 import com.example.oposiciones.R
 import com.example.oposiciones.data.Examen
 import com.example.oposiciones.data.ExamenesRepository
 import com.example.oposiciones.data.ExamenesResultadosRepository
-import com.example.oposiciones.data.ResultadosExamenes
-import kotlinx.coroutines.launch
 
+lateinit var tipoExamen: String
+
+var puntuacion: Double = 0.0
 @Composable
-fun PreguntasList(resultadosRepository: ExamenesResultadosRepository, repository: ExamenesRepository, examen: Examen?, viewModelResultados: ExamenesResultadosViewModel = viewModel(factory = ExamenesResultadosViewModelFactory(resultadosRepository))) {
+fun ExaminateListScreen(
+    resultadosRepository: ExamenesResultadosRepository,
+    repository: ExamenesRepository,
+    viewModelResultados: ExamenesResultadosViewModel = viewModel(
+        factory = ExamenesResultadosViewModelFactory(resultadosRepository)
+    )
+) {
     val context = LocalContext.current
     val viewModel: ExamenesViewModel = viewModel(
         factory = ExamenesViewModelFactory(repository, context)
     )
 
+    var examenSeleccionado by remember { mutableStateOf<Examen?>(null) }
+    var mostrarOpciones by remember { mutableStateOf(true) }  // Estado para mostrar u ocultar las Cards
 
-    val examenes = viewModel.examenList.collectAsState()
+    if (mostrarOpciones) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                onClick = {
+                    tipoExamen = "practico"
+                    examenSeleccionado = viewModel.examenRandomTeorico()
+                    mostrarOpciones = false  // Ocultar las opciones
+                },
+                modifier = Modifier.size(160.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.opo),
+                        contentDescription = "Imagen Examenes",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "Examen teórico",
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
 
-    Log.d("los examenes", examenes.toString())
-    ExamenItem3(examen, viewModelResultados)
+            Card(
+                onClick = {
+                    tipoExamen = "teorico"
+                    examenSeleccionado = viewModel.examenRandomPractica()
+                    mostrarOpciones = false  // Ocultar las opciones
+                },
+                modifier = Modifier.size(160.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.opo),
+                        contentDescription = "Imagen Examenes",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "Examen práctico",
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
 
-
+    // Mostrar ExamenItem4 si hay un examen seleccionado
+    examenSeleccionado?.let { examen ->
+        ExamenItem4(examen, viewModelResultados, viewModel)
+    }
 }
-
-var respuestasCorrectas = 0
-var respuestasIncorrectas = 0
-
-val opcionesSeleccionadas = mutableMapOf<Int, String?>()
-val respuestasMap = mutableMapOf<Int, Boolean>()
+var ambosExamenesAcabados = false
 @Composable
-fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
+fun ExamenItem4(examen: Examen?, examenes: ExamenesResultadosViewModel, viewModel: ExamenesViewModel) {
     val context = LocalContext.current
     var contador = remember { mutableStateOf(0) }
     val preguntas = examen?.preguntas ?: emptyList()
     val selectedOption = remember { mutableStateOf<String?>(null) }
+    var examenFinalizado by remember { mutableStateOf(false) }
+    var examenActual by remember { mutableStateOf(examen) }
+
     val activity = (context as? ComponentActivity)
 
     // Manejo del botón de retroceso
@@ -115,8 +172,11 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
+            selectedOption.value = opcionesSeleccionadas[contador.value]
+
             pregunta.opciones.forEach { opcion ->
                 val isSelected = opcion == selectedOption.value
+
                 TextButton(
                     onClick = {
                         selectedOption.value = opcion
@@ -136,7 +196,6 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Botón de retroceder
                 if (contador.value > 0) {
                     TextButton(
                         onClick = {
@@ -149,19 +208,28 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
                     }
                 }
 
-                // Botón de siguiente pregunta
                 TextButton(
                     onClick = {
                         if (selectedOption.value != null) {
                             val respuestaCorrecta = selectedOption.value == pregunta.respuestaCorrecta
-
                             if (!respuestasMap.containsKey(contador.value)) {
-                                if (respuestaCorrecta) respuestasCorrectas++ else respuestasIncorrectas++
+                                if (respuestaCorrecta){
+                                    respuestasCorrectas++
+                                    puntuacion += 1
+                                    Log.d("la puntuacion", puntuacion.toString())
+                                }   else{
+                                    respuestasIncorrectas++
+                                    puntuacion -= 1.33
+                                    Log.d("la puntuacion", puntuacion.toString())
+                                }
                             } else if (respuestasMap[contador.value] != respuestaCorrecta) {
                                 if (respuestaCorrecta) {
+
+
                                     respuestasCorrectas++
                                     respuestasIncorrectas--
                                 } else {
+
                                     respuestasCorrectas--
                                     respuestasIncorrectas++
                                 }
@@ -176,22 +244,16 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     if (contador.value == examen?.numeroPreguntas?.minus(1)) {
-                        Text(
-                            text = "Terminar examen",
-                            fontSize = 16.sp,
-                            color = if (selectedOption.value != null) Color.Black else Color.Gray
-                        )
+                        Text(text = "Terminar examen", fontSize = 16.sp)
                     } else {
-                        Text(
-                            text = "Siguiente pregunta",
-                            fontSize = 16.sp,
-                            color = if (selectedOption.value != null) Color.Black else Color.Gray
-                        )
+                        Text(text = "Siguiente pregunta", fontSize = 16.sp)
                     }
                 }
             }
         } else {
             // Examen finalizado
+            examenFinalizado = true
+
             Text(
                 text = "Se acabó el examen",
                 fontSize = 18.sp,
@@ -211,8 +273,18 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
                 color = Color.Red,
                 modifier = Modifier.padding(top = 16.dp)
             )
+            val calculo: Double = 10.0   / examenActual?.numeroPreguntas!!
+            Log.d("calculo",calculo.toString());
 
-            // Guardar los resultados
+
+           val resultado = puntuacion*calculo
+            Log.d("resultado",resultado.toString());
+            Text(
+                text = "Puntuacion: $resultado",
+                fontSize = 18.sp,
+                color = Color.Red,
+                modifier = Modifier.padding(top = 16.dp)
+            )
             examen?.numeroAciertos = respuestasCorrectas
             examen?.numeroFallos = respuestasIncorrectas
             if (examen != null) {
@@ -222,30 +294,30 @@ fun ExamenItem3(examen: Examen?, examenes: ExamenesResultadosViewModel) {
             respuestasCorrectas = 0
             respuestasIncorrectas = 0
             opcionesSeleccionadas.clear()
+            respuestasMap.clear()
 
-            var examenResultado by remember { mutableStateOf<ResultadosExamenes?>(null) }
-
-            // Usamos rememberCoroutineScope para lanzar la consulta en una corrutina
-            val coroutineScope = rememberCoroutineScope()
-
-            TextButton(
-                onClick = {
-                    coroutineScope.launch {
-                        examenResultado = examenes.getResultLast()
-                        respuestasMap.clear()
-
-                        examenResultado?.let {
-                            val intent = Intent(context, PreguntasGuardadasActivity::class.java).apply {
-                                putExtra("exam", it)
-                            }
-                            context.startActivity(intent)
-                        }
-                    }
-                },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Ver resultados", fontSize = 16.sp)
+            if(!ambosExamenesAcabados){
+                ambosExamenesAcabados = true
+                TextButton(
+                    onClick = {
+                        // Recargar un examen práctico
+                        examenActual = viewModel.examenRandomPractica()
+                        contador.value = 0
+                        examenFinalizado = false
+                    },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text(text = "Iniciar examen $tipoExamen", fontSize = 16.sp)
+                }
+            }else{
+                TextButton(
+                    onClick = {},
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text(text = "Ver resultados", fontSize = 16.sp)
+                }
             }
+
         }
     }
 }

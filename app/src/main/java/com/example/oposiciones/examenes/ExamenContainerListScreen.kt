@@ -41,7 +41,7 @@ fun ExamenContainerListScreen(repository: ExamenesRepository) {
 @Composable
 fun ContenedorConScrollVertical() {
     val scrollState = rememberScrollState()
-    val list = (2009..2024).toList()
+    val list = (2006..2024).toList()
 
     Column(
         modifier = Modifier

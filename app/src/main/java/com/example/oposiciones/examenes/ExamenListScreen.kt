@@ -106,6 +106,7 @@ fun ExamenItem(examen: Examen?) {
                 color = Color.Gray
             )
 
+
         }
     }
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ExamenesResultadosViewModel(private val repository: ExamenesResultadosRepository) :
     ViewModel() {
@@ -37,11 +38,12 @@ class ExamenesResultadosViewModel(private val repository: ExamenesResultadosRepo
             }
         }
 
-        fun removeResult(item: ResultadosExamenes) {
-            viewModelScope.launch(Dispatchers.IO) {
-                repository.deleteResult(item)
-            }
+    suspend fun getResultLast(): ResultadosExamenes{
+        return withContext(Dispatchers.IO) {
+            repository.getLastResult()
         }
+    }
+
 
         fun clearAll() {
             viewModelScope.launch(Dispatchers.IO) {

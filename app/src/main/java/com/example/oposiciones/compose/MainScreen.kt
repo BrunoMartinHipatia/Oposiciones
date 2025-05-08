@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.oposiciones.ExamenesContainerActivity
 import com.example.oposiciones.ExamenesGuardadosActivity
+import com.example.oposiciones.ExaminateActivity
 import com.example.oposiciones.FlashCardsActivity
 import com.example.oposiciones.R
 import com.example.oposiciones.component.CustomDrawerState
@@ -121,6 +122,7 @@ fun MainContent(
     drawerState: CustomDrawerState,
     onDrawerClick: (CustomDrawerState) -> Unit
 ) {
+
     val context = LocalContext.current
     Scaffold(
         modifier = modifier
@@ -254,7 +256,35 @@ fun MainContent(
                            )
                        }
                    }
+                   Card(
+                       onClick ={
+                           context.startActivity(Intent(context, ExaminateActivity ::class.java))
+                       },
+                       modifier = Modifier.size(160.dp),
+                       elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                   ) {
+                       Column(
+                           modifier = Modifier.fillMaxSize(),
+                           horizontalAlignment = Alignment.CenterHorizontally
+                       ) {
+                           Image(
+                               painter = painterResource(R.drawable.opo),
+                               contentDescription = "Imagen Examenes",
+                               modifier = Modifier
+                                   .weight(1f)
 
+
+                           )
+                           Text(
+                               text = "Examínate",
+                               fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                               fontWeight = FontWeight.Medium,
+                               modifier = Modifier
+                                   .padding(8.dp)  ,
+                               color = MaterialTheme.colorScheme.onSurface
+                           )
+                       }
+                   }
                }
 
            }

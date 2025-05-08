@@ -19,4 +19,10 @@ interface ExamenesResultadosDao  {
 
     @Query("SELECT * FROM result_table")
     fun getResults(): Flow<List<ResultadosExamenes>>
+
+
+    @Query("SELECT * FROM result_table ORDER BY result_id DESC LIMIT 1")
+    suspend fun getLastResult(): ResultadosExamenes
+
+
 }

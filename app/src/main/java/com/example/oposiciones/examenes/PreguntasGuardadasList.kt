@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -83,8 +86,9 @@ fun ExamenGuardadoItem(examen: ResultadosExamenes?, examenes: ExamenesResultados
     Column(
         modifier = Modifier
             .padding(16.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
+
     ) {
         if (contador.value < preguntas.size) {
             val pregunta = preguntas[contador.value]
@@ -99,42 +103,67 @@ fun ExamenGuardadoItem(examen: ResultadosExamenes?, examenes: ExamenesResultados
             // Establecer la opción seleccionada restaurada al retroceder
             selectedOption.value = respuestasGuardadas.getOrNull(contador.value)
 
-            pregunta.opciones.forEach { opcion ->
-                when {
-                    // Respuesta dada y correcta
-                    pregunta.respuestaCorrecta == opcion &&
-                            respuestasGuardadas[contador.value] == opcion -> {
-                        Text(
-                            color = Color.Green,
-                            text = "- $opcion",
-                            fontSize = 16.sp
-                        )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Imagen a la izquierda
+
+
+                // Opciones de respuesta a la derecha
+                Column(
+                    modifier = Modifier.padding(start = 16.dp),
+
+                    ) {
+                    pregunta.opciones.forEach { opcion ->
+                        when {
+                            // Respuesta dada y correcta
+                            pregunta.respuestaCorrecta == opcion &&
+                                    respuestasGuardadas[contador.value] == opcion -> {
+                                Text(
+                                    color = Color.Green,
+                                    text = "- $opcion",
+                                    fontSize = 16.sp
+                                )
+                            }
+                            // Respuesta dada pero incorrecta
+                            respuestasGuardadas[contador.value] == opcion &&
+                                    pregunta.respuestaCorrecta != opcion -> {
+                                Text(
+                                    color = Color.Red,
+                                    text = "- $opcion",
+                                    fontSize = 16.sp
+                                )
+                            }
+                            // Respuesta correcta pero no dada
+                            pregunta.respuestaCorrecta == opcion -> {
+                                Text(
+                                    color = Color.Green,
+                                    text = "- $opcion",
+                                    fontSize = 16.sp
+                                )
+                            }
+                            // Opción neutra (ni respuesta correcta ni dada)
+                            else -> {
+                                Text(
+                                    color = Color.Black,
+                                    text = "- $opcion",
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
                     }
-                    // Respuesta dada pero incorrecta
-                    respuestasGuardadas[contador.value] == opcion &&
-                            pregunta.respuestaCorrecta != opcion -> {
-                        Text(
-                            color = Color.Red,
-                            text = "- $opcion",
-                            fontSize = 16.sp
-                        )
-                    }
-                    // Respuesta correcta pero no dada
-                    pregunta.respuestaCorrecta == opcion -> {
-                        Text(
-                            color = Color.Green,
-                            text = "- $opcion",
-                            fontSize = 16.sp
-                        )
-                    }
-                    // Opción neutra (ni respuesta correcta ni dada)
-                    else -> {
-                        Text(
-                            color = Color.Black,
-                            text = "- $opcion",
-                            fontSize = 16.sp
-                        )
-                    }
+                }
+                if (pregunta.imagenResId != null) {
+                    Image(
+                        painter = painterResource(id = pregunta.imagenResId!!),
+                        contentDescription = "Imagen del examen",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 50.dp),
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
 

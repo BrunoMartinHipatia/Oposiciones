@@ -8,6 +8,8 @@ class ExamenesRepositoryImpl(private val dao : ExamenesDao) : ExamenesRepository
         dao.insertResult(result)
     }
 
+
+
     override suspend fun deleteResult(result: Examen) {
         dao.deleteResult(result)
     }
@@ -19,4 +21,5 @@ class ExamenesRepositoryImpl(private val dao : ExamenesDao) : ExamenesRepository
     override fun getSavedResults(): Flow<List<Examen>> {
         return dao.getResults()
     }
+
 }

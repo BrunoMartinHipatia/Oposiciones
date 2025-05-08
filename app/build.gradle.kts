@@ -12,10 +12,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.oposiciones"
+        applicationId = "com.bruno.oposiciones"
         minSdk = 26
         targetSdk = 34
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

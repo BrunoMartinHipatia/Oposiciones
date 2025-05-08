@@ -25,5 +25,7 @@ data class Examen(
     @ColumnInfo(name = "numero_fallos")
     var numeroFallos: Int,
     @ColumnInfo(name = "anio")
-val anio: Int
+    val anio: Int,
+    @ColumnInfo(name = "tipo")
+    val tipo: String
     ): Parcelable

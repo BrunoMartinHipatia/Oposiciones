@@ -19,4 +19,10 @@ class ExamenesResultadosRepositoryImpl(private val dao : ExamenesResultadosDao) 
     override fun getSavedResults(): Flow<List<ResultadosExamenes>> {
         return dao.getResults()
     }
+
+
+    override suspend fun getLastResult(): ResultadosExamenes {
+        return dao.getLastResult()
+    }
+
 }

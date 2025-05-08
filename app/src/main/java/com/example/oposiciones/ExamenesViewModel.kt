@@ -5,7 +5,7 @@ import android.content.res.AssetManager
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.test.platform.app.InstrumentationRegistry
+
 import com.example.oposiciones.data.Examen
 import com.example.oposiciones.data.ExamenesRepository
 import com.example.oposiciones.data.Preguntas
@@ -14,14 +14,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.random.Random
 
-class ExamenesViewModel(private val repository: ExamenesRepository, private val appContext: Context) : ViewModel() {
+class ExamenesViewModel(
+    private val repository: ExamenesRepository,
+    private val appContext: Context
+) : ViewModel() {
 
     private val _examenList = MutableStateFlow<List<Examen>>(emptyList())
+
     val examenList: StateFlow<List<Examen>> = _examenList
 
     init {
         cargarExamenes()
+
     }
 
     private fun cargarExamenes() {
@@ -43,7 +49,8 @@ class ExamenesViewModel(private val repository: ExamenesRepository, private val 
         preguntas: List<Preguntas>,
         numeroAciertos: Int,
         numeroFallos: Int,
-        anio: Int
+        anio: Int,
+        teorico: String
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertResult(
@@ -54,10 +61,83 @@ class ExamenesViewModel(private val repository: ExamenesRepository, private val 
                     preguntas,
                     numeroAciertos,
                     numeroFallos,
-                    anio
+                    anio,
+                    teorico
                 )
             )
         }
+    }
+    lateinit var examen: Examen
+
+    lateinit var  preguntas:Preguntas
+
+    fun examenRandomTeorico() :Examen {
+        val json = loadJSONFromAsset(appContext, "JsonPreguntas.json")
+        val examenes = json?.let { parseJson(it) }
+
+        examenes?.let {
+            viewModelScope.launch {
+                val preguntasSeleccionadas = mutableListOf<Preguntas>()
+
+
+                val examenesTeoricos = it.filter { examen -> examen.tipo == "teorico" }
+
+                // Obtener todas las preguntas de los exámenes teóricos
+                val todasLasPreguntas = examenesTeoricos.flatMap { examen -> examen.preguntas }
+
+                // Seleccionar 100 preguntas aleatorias sin repetición
+                preguntasSeleccionadas.addAll(todasLasPreguntas.shuffled().take(100))
+
+                // Crear el examen con las preguntas seleccionadas
+                examen = Examen(
+                    id = 0,
+                    nombre = "Examen Teórico Aleatorio",
+                    numeroPreguntas = preguntasSeleccionadas.size,
+                    preguntas = preguntasSeleccionadas,
+                    numeroAciertos = 0,
+                    numeroFallos = 0,
+                    anio = 0,
+                    tipo = "teorico"
+                )
+
+                Log.d("Examen generado", examen.toString())
+            }
+        }
+        return examen
+    }
+    fun examenRandomPractica() :Examen {
+        val json = loadJSONFromAsset(appContext, "JsonPreguntas.json")
+        val examenes = json?.let { parseJson(it) }
+
+        examenes?.let {
+            viewModelScope.launch {
+                val preguntasSeleccionadas = mutableListOf<Preguntas>()
+
+
+                val examenesTeoricos = it.filter { examen -> examen.tipo == "practico" }
+
+                // Obtener todas las preguntas de los exámenes teóricos
+                val todasLasPreguntas = examenesTeoricos.flatMap { examen -> examen.preguntas }
+
+                // Seleccionar 100 preguntas aleatorias sin repetición
+                preguntasSeleccionadas.addAll(todasLasPreguntas.shuffled().take(4))
+
+                // Crear el examen con las preguntas seleccionadas
+                examen = Examen(
+                    id = 0,
+                    nombre = "Examen Teórico Aleatorio",
+                    numeroPreguntas = preguntasSeleccionadas.size,
+                    preguntas = preguntasSeleccionadas,
+                    numeroAciertos = 0,
+                    numeroFallos = 0,
+                    anio = 0,
+                    tipo = "teorico"
+                )
+
+                Log.d("Examen generado", examen.toString())
+            }
+        }
+        return examen
     }
 
     fun loadJSONFromAsset(context: android.content.Context, filename: String): String? {

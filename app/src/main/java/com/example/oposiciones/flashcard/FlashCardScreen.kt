@@ -54,6 +54,7 @@ fun MenuFlashCards(onCreateFlashCard: () -> Unit, onViewFlashCards: () -> Unit) 
         }
     }
 }
+
 @Composable
 fun CrearFlashCard(onBack: () -> Unit, viewModel: FlashCardViewModel) {
     var textoPregunta by rememberSaveable { mutableStateOf("") }
